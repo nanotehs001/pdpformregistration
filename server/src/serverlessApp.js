@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import formRoutes from './routes/forms.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
-import { ensureLoaded } from './services/configStore.js';
+import { ensureLoaded, isKvConfigured } from './services/configStore.js';
 
 dotenv.config();
 
@@ -49,7 +49,8 @@ app.use('/admin', adminRoutes);
 app.use('/', formRoutes);
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+  // kv is a boolean only — no secrets — so KV detection can be checked without auth.
+  res.json({ status: 'ok', kv: isKvConfigured() });
 });
 
 // Temporarily expose the real error message so production 500s are debuggable.
