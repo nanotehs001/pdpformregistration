@@ -117,3 +117,19 @@ export async function persistConfig(updates) {
   }
   return allWritten ? { saved: true, via: 'env' } : { saved: false, via: 'none' };
 }
+
+/**
+ * Writes a timestamp to KV so the store registers activity. Called by the daily
+ * cron to keep a free-tier Upstash database from being flagged as idle.
+ */
+export async function pingKv() {
+  if (!isKvConfigured()) return { ok: false, reason: 'kv-not-configured' };
+  try {
+    const stamp = new Date().toISOString();
+    await kvClient().set('__keepalive__', stamp);
+    return { ok: true, at: stamp };
+  } catch (error) {
+    console.error('[configStore] KV ping failed:', error.message);
+    return { ok: false, reason: error.message };
+  }
+}

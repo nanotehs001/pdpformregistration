@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import formRoutes from './routes/forms.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
-import { ensureLoaded, isKvConfigured } from './services/configStore.js';
+import { ensureLoaded, isKvConfigured, pingKv } from './services/configStore.js';
 
 dotenv.config();
 
@@ -52,6 +52,22 @@ app.get('/health', (req, res) => {
   // kv is a boolean only — no secrets — so KV detection can be checked without auth.
   res.json({ status: 'ok', kv: isKvConfigured() });
 });
+
+// Hit daily by Vercel Cron to keep the free-tier Upstash database from going
+// idle. If CRON_SECRET is set, only requests carrying it are allowed (Vercel
+// sends it automatically); if unset, the endpoint is open (it does nothing
+// sensitive — just writes a timestamp).
+async function keepAlive(req, res) {
+  const secret = process.env.CRON_SECRET;
+  if (secret && req.get('authorization') !== `Bearer ${secret}`) {
+    return res.status(401).json({ ok: false, error: 'unauthorized' });
+  }
+  const result = await pingKv();
+  res.json(result);
+}
+
+app.get('/keep-alive', keepAlive);
+app.get('/api/keep-alive', keepAlive);
 
 // Temporarily expose the real error message so production 500s are debuggable.
 app.use((err, req, res, next) => {

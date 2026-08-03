@@ -7,5 +7,8 @@
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/pdpadmin(.*)", "destination": "/index.html" },
     { "source": "/form(.*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    { "path": "/api/keep-alive", "schedule": "0 6 * * *" }
   ]
 }
