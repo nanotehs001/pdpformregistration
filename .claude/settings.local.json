@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -X POST http://localhost:3000/api/submit-form -F 'data={\"firstName\":\"Ana\",\"middleName\":\"Cruz\",\"surname\":\"Ramos\",\"birthdate\":\"1991-07-09\",\"birthplace\":\"Cebu\",\"age\":35,\"gender\":\"Female\",\"civilStatus\":\"Married\",\"religion\":\"Catholic\",\"permanentAddress\":\"7 Mango Ave\",\"region\":\"Central Visayas\",\"province\":\"Cebu\",\"municipality\":\"City of Cebu\",\"barangay\":\"Lahug\",\"district\":\"1st District\",\"mobileNumber\":\"+639171112222\",\"email\":\"ana@example.com\",\"educationalAttainment\":\"Bachelor\",\"nameOfSchool\":\"USC\",\"yearGraduated\":2013,\"currentProfession\":\"Teacher\",\"signature\":\"Ana Cruz Ramos\",\"recruitedBy\":\"Local Chapter\",\"governmentEmployee\":{\"checked\":true,\"position\":\"Teacher III\",\"office\":\"DepEd Cebu\",\"yearHired\":2014}}' -F 'profilePhoto=@C:/Users/nanot/AppData/Local/Temp/claude/C--Users-nanot-PDP/85d916bd-e450-4f3c-a71f-6a363d8e4aff/scratchpad/test-photo.png;type=image/png' -w '\\\\nHTTP %{http_code}\\\\n')",
+      "Bash(node -e ' *)",
+      "Bash(curl -s -X POST http://localhost:3000/api/submit-form -F 'data={\"firstName\":\"Ben\",\"middleName\":\"Lim\",\"surname\":\"Tan\",\"birthdate\":\"1985-02-14\",\"age\":41,\"gender\":\"Male\",\"civilStatus\":\"Single\",\"religion\":\"Catholic\",\"region\":\"NCR\",\"municipality\":\"City of Manila\",\"barangay\":\"Barangay 1\",\"mobileNumber\":\"+639221113333\",\"email\":\"ben@example.com\",\"signature\":\"Ben Lim Tan\",\"privateEmployee\":{\"checked\":true,\"position\":\"Manager\",\"office\":\"AcmeCo\"}}' -w '\\\\nHTTP %{http_code}\\\\n' -o /dev/null -s)",
+      "Bash(node -e \"const d=require\\('./package.json'\\).dependencies; console.log\\(Object.keys\\(d\\).filter\\(k=>/sqlite|bcrypt|canvas|sharp/.test\\(k\\)\\).join\\(', '\\)||'\\(none besides sqlite3\\)'\\)\")"
+    ]
+  }
+}
