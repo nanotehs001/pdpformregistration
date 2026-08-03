@@ -89,8 +89,33 @@ export function MembershipForm({ onSuccess }) {
     }
   };
 
+  // react-hook-form calls this when validation blocks submission. Without it,
+  // a failing field on a hidden step (or the top-level employment refine, whose
+  // error has no rendered field) makes the Submit button appear to do nothing.
+  const onInvalid = (errors) => {
+    const readable = {
+      firstName: 'First name', middleName: 'Middle name', surname: 'Surname',
+      birthdate: 'Birthdate', birthplace: 'Birthplace', age: 'Age',
+      gender: 'Gender', civilStatus: 'Civil status', religion: 'Religion',
+      permanentAddress: 'Permanent address', region: 'Region', barangay: 'Barangay',
+      municipality: 'Municipality/City', district: 'District',
+      mobileNumber: 'Mobile number', email: 'Email',
+      educationalAttainment: 'Educational attainment', nameOfSchool: 'School',
+      yearGraduated: 'Year graduated', currentProfession: 'Current profession',
+      employment: 'Employment (fill at least one section with a position/organization)',
+      attestationChecked: 'Attestation checkbox', signature: 'Printed name',
+      signatureImage: 'Signature drawing'
+    };
+
+    const labels = Object.keys(errors).map((key) => readable[key] || key);
+    setSubmitError(
+      `Please complete these before submitting: ${labels.join(', ')}.`
+    );
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="membership-form">
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="membership-form">
       <div className="form-header">
         <h1>PDP Membership Application Form</h1>
         <p className="form-subtitle">Philippine Democratic Party</p>
