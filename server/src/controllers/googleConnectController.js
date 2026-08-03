@@ -3,7 +3,7 @@ import { createState, verifyState } from '../services/oauthState.js';
 import { setEnvValue, canWriteEnv } from '../services/envWriter.js';
 import { resetTokenCache } from '../services/authService.js';
 
-function buildClient() {
+function buildClient(redirectUrl) {
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
 
@@ -14,19 +14,23 @@ function buildClient() {
   return new google.auth.OAuth2(
     clientId,
     clientSecret,
-    process.env.GOOGLE_OAUTH_REDIRECT_URL || 'http://localhost:3000/api/auth/google-callback'
+    redirectUrl
   );
 }
 
 /** Admin-only: starts the consent flow. */
 export function initiateGoogleAuth(req, res) {
   try {
-    const client = buildClient();
+    // Construct the callback URL from the request. This works on localhost, Vercel, etc.
+    const protocol = req.get('x-forwarded-proto') || req.protocol || 'http';
+    const host = req.get('x-forwarded-host') || req.get('host');
+    const callbackUrl = process.env.GOOGLE_OAUTH_REDIRECT_URL ||
+      `${protocol}://${host}/api/auth/google-callback`;
+
+    const client = buildClient(callbackUrl);
 
     const url = client.generateAuthUrl({
       access_type: 'offline',
-      // Without this Google omits the refresh token for an account that has
-      // already consented — which is exactly the reconnect case.
       prompt: 'consent',
       scope: [
         'https://www.googleapis.com/auth/drive',
@@ -113,7 +117,12 @@ export async function handleGoogleAuthCallback(req, res) {
   if (!verifyState(state)) return fail('This link has expired or is invalid. Start the connection again.');
 
   try {
-    const client = buildClient();
+    const protocol = req.get('x-forwarded-proto') || req.protocol || 'http';
+    const host = req.get('x-forwarded-host') || req.get('host');
+    const callbackUrl = process.env.GOOGLE_OAUTH_REDIRECT_URL ||
+      `${protocol}://${host}/api/auth/google-callback`;
+
+    const client = buildClient(callbackUrl);
     const { tokens } = await client.getToken(code);
 
     if (!tokens.refresh_token) {
