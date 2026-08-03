@@ -39,11 +39,18 @@ export function useAdminConfig() {
   // result page, so there is nothing to handle back here.
   const connectGoogle = async () => {
     try {
+      console.log('Requesting OAuth URL from', `${API_BASE_URL}/auth/google`);
       const { data } = await axios.get(`${API_BASE_URL}/auth/google`, {
         headers: authHeader()
       });
+      console.log('OAuth response:', data);
+      if (!data.authUrl) {
+        setError('Server did not return authorization URL.');
+        return;
+      }
       window.location.href = data.authUrl;
     } catch (err) {
+      console.error('OAuth error:', err);
       setError(err.response?.data?.message || 'Could not start the Google connection.');
     }
   };
