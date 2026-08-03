@@ -4,7 +4,6 @@
   "buildCommand": "cd client && npm run build",
   "outputDirectory": "client/dist",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/server/api/index.js" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
