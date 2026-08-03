@@ -12,6 +12,15 @@ import { AdminSection } from './sections/AdminSection';
 import { submitFormData } from '../api/submitForm';
 import { useState } from 'react';
 
+function fileToDataUrl(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => resolve('');
+    reader.readAsDataURL(file);
+  });
+}
+
 const STEPS = [
   { id: 1, title: 'Personal Information', description: 'Your basic details' },
   { id: 2, title: 'Address & Photo', description: 'Where you live + profile photo' },
@@ -79,8 +88,12 @@ export function MembershipForm({ onSuccess }) {
     setSubmitError(null);
 
     try {
-      await submitFormData(data);
-      onSuccess();
+      const result = await submitFormData(data);
+      // Capture the chosen photo as a data URL before reset() clears it, so the
+      // confirmation card can show it immediately without waiting on Drive.
+      const photoDataUrl =
+        data.profilePhoto instanceof File ? await fileToDataUrl(data.profilePhoto) : '';
+      onSuccess({ ...result, details: data, photoDataUrl });
       reset();
     } catch (error) {
       setSubmitError(error.message || 'Failed to submit form. Please try again.');

@@ -1,22 +1,13 @@
 import { useState } from 'react';
 import { MembershipForm } from '../components/MembershipForm';
-import { SuccessMessage } from '../components/SuccessMessage';
+import { MembershipCard } from '../components/MembershipCard';
 
 export function FormPage() {
-  const [submitted, setSubmitted] = useState(false);
+  const [result, setResult] = useState(null);
 
-  const handleSuccess = () => {
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
-  };
+  if (result) {
+    return <MembershipCard result={result} onReset={() => setResult(null)} />;
+  }
 
-  return (
-    <>
-      {submitted ? (
-        <SuccessMessage onReset={() => setSubmitted(false)} />
-      ) : (
-        <MembershipForm onSuccess={handleSuccess} />
-      )}
-    </>
-  );
+  return <MembershipForm onSuccess={setResult} />;
 }

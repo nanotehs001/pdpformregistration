@@ -37,7 +37,9 @@ export const SHEET_COLUMNS = [
   { key: 'signatureImageUrl', label: 'Signature Image' },
   { key: 'profilePhotoUrl', label: 'Profile Photo' },
   { key: 'recruitedBy', label: 'Recruited By' },
-  { key: 'recommendedBy', label: 'Recommended By' }
+  { key: 'recommendedBy', label: 'Recommended By' },
+  { key: 'membershipId', label: 'Membership ID' },
+  { key: 'cardUrl', label: 'Card URL (print)' }
 ];
 
 export const SHEET_HEADERS = SHEET_COLUMNS.map((column) => column.label);

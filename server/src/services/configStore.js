@@ -133,3 +133,39 @@ export async function pingKv() {
     return { ok: false, reason: error.message };
   }
 }
+
+const MEMBER_PREFIX = 'member:';
+
+/**
+ * Stores a member record keyed by its ID, but only if that ID is unused (nx).
+ * Returns true when written, false when the ID already exists (caller should
+ * regenerate) or KV is unavailable.
+ */
+export async function saveMember(id, record) {
+  if (!isKvConfigured()) return false;
+  try {
+    const result = await kvClient().set(
+      `${MEMBER_PREFIX}${id}`,
+      JSON.stringify(record),
+      { nx: true }
+    );
+    return result === 'OK';
+  } catch (error) {
+    console.error('[configStore] saveMember failed:', error.message);
+    return false;
+  }
+}
+
+/** Looks up a member record by ID. Returns the record object, or null. */
+export async function getMember(id) {
+  if (!isKvConfigured()) return null;
+  try {
+    const raw = await kvClient().get(`${MEMBER_PREFIX}${id}`);
+    if (!raw) return null;
+    // @upstash/redis may return an already-parsed object or a JSON string.
+    return typeof raw === 'string' ? JSON.parse(raw) : raw;
+  } catch (error) {
+    console.error('[configStore] getMember failed:', error.message);
+    return null;
+  }
+}

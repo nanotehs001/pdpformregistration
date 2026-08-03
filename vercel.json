@@ -6,6 +6,7 @@
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/pdpadmin(.*)", "destination": "/index.html" },
+    { "source": "/card/(.*)", "destination": "/index.html" },
     { "source": "/form(.*)", "destination": "/index.html" }
   ],
   "crons": [

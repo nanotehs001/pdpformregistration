@@ -7,6 +7,39 @@ import {
   uploadSignatureToDrive
 } from '../services/driveService.js';
 import { getValidAccessToken, getAdminConfig } from '../services/authService.js';
+import { generateMembershipId } from '../services/membershipId.js';
+import { saveMember, getMember, isKvConfigured } from '../services/configStore.js';
+
+// Builds the public origin (https://host) from the proxied request, falling back
+// to FRONTEND_URL. Used to construct the printable card URL.
+function resolveOrigin(req) {
+  const envOrigin = (process.env.FRONTEND_URL || '').split(',')[0].trim().replace(/\/+$/, '');
+  if (envOrigin) return envOrigin;
+  const proto = req.get('x-forwarded-proto') || req.protocol || 'https';
+  const host = req.get('x-forwarded-host') || req.get('host');
+  return `${proto}://${host}`;
+}
+
+/**
+ * Produces a membership ID and, when KV is available, persists a small verify
+ * record under it — retrying on the rare collision so the ID is unique. Returns
+ * the id (and whether the verify record was stored).
+ */
+async function assignMembershipId(record) {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const id = generateMembershipId();
+    if (!isKvConfigured()) {
+      // No store to check against; the timestamp+random id is effectively unique.
+      return { id, stored: false };
+    }
+    const stored = await saveMember(id, { id, ...record });
+    if (stored) return { id, stored: true };
+  }
+  // Extremely unlikely: fall back to a definitely-unique id built from the clock.
+  const fallback = `PDP-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
+  await saveMember(fallback, { id: fallback, ...record });
+  return { id: fallback, stored: true };
+}
 
 // Multipart sends everything as strings, so the structured fields arrive as JSON.
 function parseJsonField(value, fallback) {
@@ -33,6 +66,7 @@ export async function submitForm(req, res) {
     // valid application, so the row is still written with an empty link.
     let signatureLink = '';
     let photoLink = '';
+    let photoFileId = '';
 
     const needsDrive = Boolean(data.signatureImage || req.file);
 
@@ -68,17 +102,44 @@ export async function submitForm(req, res) {
             folderId
           );
           photoLink = uploaded.webViewLink;
+          photoFileId = uploaded.fileId;
         }
       } catch (uploadError) {
         console.error('Drive upload failed, continuing without it:', uploadError.message);
       }
     }
 
+    // A Drive thumbnail URL embeds reliably in an <img>, unlike the share link,
+    // so the printable card page (opened later from the Sheet) can show the photo.
+    const photoUrl = photoFileId
+      ? `https://drive.google.com/thumbnail?id=${photoFileId}&sz=w600`
+      : '';
+
+    const fullName = [data.firstName, data.middleName, data.surname]
+      .filter(Boolean)
+      .join(' ');
+    const location = [data.municipality, data.province].filter(Boolean).join(', ');
+
+    // Assign the membership ID and store the verify/print record in KV.
+    const { id: membershipId } = await assignMembershipId({
+      fullName,
+      location,
+      photoUrl,
+      createdAt: new Date().toISOString()
+    });
+
+    // The printable ID card lives at this URL; it's stored in the Sheet and is
+    // also what the card's QR code points to.
+    const origin = resolveOrigin(req);
+    const cardUrl = `${origin}/card/${membershipId}`;
+
     // Column order comes from the server so it always matches the header row.
     const row = buildSheetRow({
       ...data,
       signatureImageUrl: signatureLink,
-      profilePhotoUrl: photoLink
+      profilePhotoUrl: photoLink,
+      membershipId,
+      cardUrl
     });
 
     const result = await appendRowToSheet(row);
@@ -86,6 +147,10 @@ export async function submitForm(req, res) {
     res.status(201).json({
       success: true,
       message: 'Form submitted successfully',
+      membershipId,
+      cardUrl,
+      fullName,
+      location,
       photoUploaded: Boolean(photoLink),
       signatureUploaded: Boolean(signatureLink),
       ...result
@@ -97,6 +162,38 @@ export async function submitForm(req, res) {
       message: error.message
     });
   }
+}
+
+/**
+ * Public lookup for the printable card / QR verification page. Returns the
+ * stored member record (name, location, photo, date) or 404 if unknown.
+ */
+export async function getMemberCard(req, res) {
+  const id = String(req.params.id || '').trim();
+  if (!/^PDP-\d{4}-\d{4,6}$/.test(id)) {
+    return res.status(400).json({ valid: false, error: 'Invalid membership ID' });
+  }
+
+  if (!isKvConfigured()) {
+    return res.status(503).json({
+      valid: false,
+      error: 'Verification store is not configured.'
+    });
+  }
+
+  const member = await getMember(id);
+  if (!member) {
+    return res.status(404).json({ valid: false, error: 'Member not found' });
+  }
+
+  res.json({
+    valid: true,
+    id,
+    fullName: member.fullName || '',
+    location: member.location || '',
+    photoUrl: member.photoUrl || '',
+    createdAt: member.createdAt || ''
+  });
 }
 
 export async function getFormHeaders(req, res) {

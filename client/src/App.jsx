@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { FormPage } from './pages/FormPage';
 import { AdminPage } from './pages/AdminPage';
+import { CardPage } from './pages/CardPage';
 import './styles/app.css';
 
 function App() {
@@ -19,6 +20,8 @@ function App() {
         <div className="app-container">
           <Routes>
             <Route path="/" element={<FormPage />} />
+            {/* Printable member ID card / QR verification target. */}
+            <Route path="/card/:id" element={<CardPage />} />
             {/* Unlinked on purpose — reachable only by typing the URL. */}
             <Route path="/pdpadmin" element={<AdminPage />} />
             {/* Unknown paths (including the old /admin) fall back to the form
