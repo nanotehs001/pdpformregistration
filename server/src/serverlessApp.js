@@ -48,7 +48,8 @@ app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/', formRoutes);
 
-app.get('/health', (req, res) => {
+// Registered at both paths since Vercel forwards the original /api-prefixed URL.
+app.get(['/health', '/api/health'], (req, res) => {
   // kv is a boolean only — no secrets — so KV detection can be checked without auth.
   res.json({ status: 'ok', kv: isKvConfigured() });
 });
