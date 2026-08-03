@@ -1,0 +1,25 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd client && npm run build",
+  "outputDirectory": "client/dist",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/server/api/index.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "functions": {
+    "server/api/index.js": {
+      "runtime": "nodejs18.x",
+      "maxDuration": 30
+    }
+  },
+  "env": [
+    "GOOGLE_OAUTH_CLIENT_ID",
+    "GOOGLE_OAUTH_CLIENT_SECRET",
+    "GOOGLE_REFRESH_TOKEN",
+    "GOOGLE_SHEET_URL",
+    "GOOGLE_DRIVE_FOLDER_URL",
+    "ADMIN_PASSWORD",
+    "ADMIN_SESSION_SECRET",
+    "FRONTEND_URL"
+  ]
+}
