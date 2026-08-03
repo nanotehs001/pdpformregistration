@@ -12,14 +12,4 @@
       "maxDuration": 30
     }
   },
-  "env": [
-    "GOOGLE_OAUTH_CLIENT_ID",
-    "GOOGLE_OAUTH_CLIENT_SECRET",
-    "GOOGLE_REFRESH_TOKEN",
-    "GOOGLE_SHEET_URL",
-    "GOOGLE_DRIVE_FOLDER_URL",
-    "ADMIN_PASSWORD",
-    "ADMIN_SESSION_SECRET",
-    "FRONTEND_URL"
-  ]
 }
