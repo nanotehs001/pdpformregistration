@@ -5,6 +5,7 @@
   "type": "module",
   "description": "PDP membership application form",
   "dependencies": {
+    "@vercel/kv": "^3.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",

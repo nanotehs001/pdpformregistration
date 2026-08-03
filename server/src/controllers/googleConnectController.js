@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
 import { createState, verifyState } from '../services/oauthState.js';
-import { setEnvValue, canWriteEnv } from '../services/envWriter.js';
+import { persistConfig } from '../services/configStore.js';
 import { resetTokenCache } from '../services/authService.js';
 
 function buildClient(redirectUrl) {
@@ -135,33 +135,45 @@ export async function handleGoogleAuthCallback(req, res) {
     // Newly issued token invalidates whatever access token is cached.
     resetTokenCache();
 
-    const wrote = setEnvValue('GOOGLE_REFRESH_TOKEN', tokens.refresh_token);
+    const { via } = await persistConfig({ GOOGLE_REFRESH_TOKEN: tokens.refresh_token });
 
-    const tokenBlock = `
-      <p>Add this as <code>GOOGLE_REFRESH_TOKEN</code> in your Vercel project's
-         Environment Variables, then redeploy.</p>
-      <span class="token" id="tok">${escapeHtml(tokens.refresh_token)}</span>
-      <button id="copy" type="button">Copy token</button>
-      <a class="btn" href="${escapeHtml(adminUrl())}">Back to dashboard</a>
-      <p class="note">Treat this like a password — it grants ongoing access to this
-         account's Drive and Sheets. It is shown only once.</p>`;
+    const backButton = `<a class="btn" href="${escapeHtml(adminUrl())}">Back to dashboard</a>`;
 
-    if (wrote) {
+    // Saved to KV: live immediately, no token needs to leave the server.
+    if (via === 'kv') {
       return res.send(resultPage({
         title: 'Google connected',
         tone: 'ok',
         body: `<h1><span class="mark">✓</span> Google connected</h1>
-               <p>Saved to your local <code>.env</code>. Restart the dev server to be sure
-                  every process picks it up.</p>
-               ${tokenBlock}`
+               <p>Saved securely. This account is active now — no redeploy needed.</p>
+               ${backButton}`
       }));
     }
 
+    // Saved to local .env (dev).
+    if (via === 'env') {
+      return res.send(resultPage({
+        title: 'Google connected',
+        tone: 'ok',
+        body: `<h1><span class="mark">✓</span> Google connected</h1>
+               <p>Saved to your local <code>.env</code>. Restart the dev server so
+                  every process picks it up.</p>
+               ${backButton}`
+      }));
+    }
+
+    // Could not persist (Vercel without KV): show the token to paste by hand.
     return res.send(resultPage({
       title: 'Google connected',
       tone: 'ok',
       body: `<h1><span class="mark">✓</span> Google authorized</h1>
-             ${tokenBlock}`
+             <p>Add this as <code>GOOGLE_REFRESH_TOKEN</code> in your Vercel project's
+                Environment Variables, then redeploy.</p>
+             <span class="token" id="tok">${escapeHtml(tokens.refresh_token)}</span>
+             <button id="copy" type="button">Copy token</button>
+             ${backButton}
+             <p class="note">Treat this like a password — it grants ongoing access to this
+                account's Drive and Sheets. It is shown only once.</p>`
     }));
   } catch (error) {
     console.error('Error handling auth callback:', error);

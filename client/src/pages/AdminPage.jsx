@@ -60,7 +60,7 @@ function DestinationCard({ config, updateDestination }) {
   const [folderUrl, setFolderUrl] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [saved, setSaved] = useState(false);
+  const [savedVia, setSavedVia] = useState(null); // 'kv' | 'env' | null
   const [manualEnv, setManualEnv] = useState(null);
 
   // Prefill with the current ids so the fields aren't blank on load.
@@ -73,12 +73,12 @@ function DestinationCard({ config, updateDestination }) {
     e.preventDefault();
     setBusy(true);
     setError('');
-    setSaved(false);
+    setSavedVia(null);
     setManualEnv(null);
     try {
       const result = await updateDestination({ sheetUrl, folderUrl });
       if (result.saved) {
-        setSaved(true);
+        setSavedVia(result.via || 'env');
       } else if (result.needsManualEnv) {
         setManualEnv(result.values || []);
       }
@@ -128,8 +128,16 @@ function DestinationCard({ config, updateDestination }) {
 
       {error && <div className="alert alert-error">{error}</div>}
 
-      {saved && (
-        <div className="alert alert-success">Saved. New submissions will use these.</div>
+      {savedVia === 'kv' && (
+        <div className="alert alert-success">
+          Saved and live now — new submissions use these immediately. No redeploy needed.
+        </div>
+      )}
+
+      {savedVia === 'env' && (
+        <div className="alert alert-success">
+          Saved to <code>server/.env</code>. Restart the server for it to take effect.
+        </div>
       )}
 
       {manualEnv && (

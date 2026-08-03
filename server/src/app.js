@@ -4,10 +4,21 @@ import dotenv from 'dotenv';
 import formRoutes from './routes/forms.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
+import { ensureLoaded } from './services/configStore.js';
 
 dotenv.config();
 
 const app = express();
+
+// Prime KV-backed config before handlers read it (no-op when KV is unset).
+app.use(async (req, res, next) => {
+  try {
+    await ensureLoaded();
+  } catch {
+    // never block a request on config loading
+  }
+  next();
+});
 
 // Multiple origins so preview deployments keep working alongside production.
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')

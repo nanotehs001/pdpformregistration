@@ -4,10 +4,22 @@ import dotenv from 'dotenv';
 import formRoutes from './routes/forms.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
+import { ensureLoaded } from './services/configStore.js';
 
 dotenv.config();
 
 const app = express();
+
+// Prime KV-backed config into the in-memory cache before any handler reads it.
+// No-op (and instant) when KV isn't configured.
+app.use(async (req, res, next) => {
+  try {
+    await ensureLoaded();
+  } catch {
+    // configStore already logs; never block a request on config loading.
+  }
+  next();
+});
 
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
   .split(',')

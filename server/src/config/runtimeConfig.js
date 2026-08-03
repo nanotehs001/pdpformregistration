@@ -1,12 +1,12 @@
 /**
- * Single source of truth for runtime configuration — all of it from the
- * environment.
+ * Single source of truth for runtime configuration.
  *
- * There is no database. That is a deliberate fit for serverless hosting
- * (Vercel), where the filesystem is ephemeral and nothing written at runtime
- * survives. The consequence is that configuration changes require updating
- * environment variables and redeploying; the admin dashboard is read-only.
+ * Values come from environment variables by default. When Vercel KV is
+ * configured, admin-editable keys (Sheet URL, Drive folder, Google refresh
+ * token) can be overridden live via the KV-backed configStore — those overrides
+ * take precedence so changes made in the dashboard apply without a redeploy.
  */
+import { getOverride } from '../services/configStore.js';
 
 // Accepts a full Google URL or a bare ID so a pasted URL and a raw ID behave
 // identically.
@@ -25,12 +25,22 @@ export function idFromFolderUrl(value) {
 }
 
 export function getRuntimeConfig() {
+  // KV overrides win over env vars; both fall back to the legacy *_ID names.
+  const sheetSource =
+    getOverride('GOOGLE_SHEET_URL') ||
+    process.env.GOOGLE_SHEET_URL ||
+    process.env.GOOGLE_SHEET_ID;
+  const folderSource =
+    getOverride('GOOGLE_DRIVE_FOLDER_URL') ||
+    process.env.GOOGLE_DRIVE_FOLDER_URL ||
+    process.env.GOOGLE_DRIVE_FOLDER_ID;
+  const refreshToken =
+    getOverride('GOOGLE_REFRESH_TOKEN') || process.env.GOOGLE_REFRESH_TOKEN || null;
+
   return {
-    sheetId: idFromSheetUrl(process.env.GOOGLE_SHEET_URL || process.env.GOOGLE_SHEET_ID),
-    folderId: idFromFolderUrl(
-      process.env.GOOGLE_DRIVE_FOLDER_URL || process.env.GOOGLE_DRIVE_FOLDER_ID
-    ),
-    refreshToken: process.env.GOOGLE_REFRESH_TOKEN || null,
+    sheetId: idFromSheetUrl(sheetSource),
+    folderId: idFromFolderUrl(folderSource),
+    refreshToken,
     clientId: process.env.GOOGLE_OAUTH_CLIENT_ID || null,
     clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || null
   };

@@ -4,7 +4,7 @@ import {
   idFromSheetUrl,
   idFromFolderUrl
 } from '../config/runtimeConfig.js';
-import { setEnvValue } from '../services/envWriter.js';
+import { persistConfig, ensureLoaded } from '../services/configStore.js';
 import {
   verifyPassword,
   issueToken,
@@ -43,8 +43,11 @@ export function adminSession(req, res) {
   res.json({ authRequired: true, authenticated: Boolean(token && verifyToken(token)) });
 }
 
-export function getConfig(req, res) {
+export async function getConfig(req, res) {
   try {
+    // Force a fresh KV read so the dashboard never shows a stale value right
+    // after a save on another warm instance.
+    await ensureLoaded(true);
     res.json({
       config: getAdminConfig(),
       problems: configProblems()
@@ -62,12 +65,12 @@ export function getConfig(req, res) {
  * Admin-only: updates where submissions are stored. A full Google URL or a bare
  * ID is accepted for either field.
  *
- * Locally this writes to server/.env and takes effect immediately. On Vercel the
- * filesystem is read-only, so it cannot persist — it returns the exact values
- * for the admin to paste into the project's Environment Variables (mirroring how
- * the Google refresh token is handled).
+ * With Vercel KV configured this persists to KV and is live immediately — no
+ * redeploy. Locally it writes to server/.env. If neither is available (e.g. on
+ * Vercel with KV not connected), it returns the exact values for the admin to
+ * paste into Environment Variables by hand.
  */
-export function updateDestination(req, res) {
+export async function updateDestination(req, res) {
   const sheetUrl = typeof req.body?.sheetUrl === 'string' ? req.body.sheetUrl.trim() : '';
   const folderUrl = typeof req.body?.folderUrl === 'string' ? req.body.folderUrl.trim() : '';
 
@@ -89,19 +92,18 @@ export function updateDestination(req, res) {
   }
 
   // Store the raw value the admin provided; runtimeConfig parses the id on read.
-  const wroteSheet = setEnvValue('GOOGLE_SHEET_URL', sheetUrl);
-  const wroteFolder = folderUrl
-    ? setEnvValue('GOOGLE_DRIVE_FOLDER_URL', folderUrl)
-    : true;
+  const updates = { GOOGLE_SHEET_URL: sheetUrl };
+  if (folderUrl) updates.GOOGLE_DRIVE_FOLDER_URL = folderUrl;
 
-  const persisted = wroteSheet && wroteFolder;
+  const { saved, via } = await persistConfig(updates);
 
   res.json({
-    saved: persisted,
-    // When the file could not be written (Vercel), the admin must set these by
-    // hand. Send back the exact key/value pairs to make that copy-paste trivial.
-    needsManualEnv: !persisted,
-    values: persisted
+    saved,
+    via, // 'kv' | 'env' | 'none'
+    // When nothing could be written (Vercel without KV), the admin must set
+    // these by hand. Send the exact key/value pairs to make copy-paste trivial.
+    needsManualEnv: !saved,
+    values: saved
       ? undefined
       : [
           { key: 'GOOGLE_SHEET_URL', value: sheetUrl },
