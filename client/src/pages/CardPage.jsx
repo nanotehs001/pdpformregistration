@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { QRCodeSVG } from 'qrcode.react';
+import { toPng } from 'html-to-image';
 import '../styles/card.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -13,6 +14,25 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 export function CardPage() {
   const { id } = useParams();
   const [state, setState] = useState({ status: 'loading', member: null, error: '' });
+  const [saving, setSaving] = useState(false);
+  const cardRef = useRef(null);
+
+  const saveAsImage = async () => {
+    if (!cardRef.current) return;
+    setSaving(true);
+    try {
+      // Capture only the ID card node (not the whole page).
+      const dataUrl = await toPng(cardRef.current, { pixelRatio: 2, cacheBust: true });
+      const link = document.createElement('a');
+      link.download = `${id}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Save as image failed:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -62,17 +82,31 @@ export function CardPage() {
   const place = (member.location || '').toUpperCase();
   const cardUrl = typeof window !== 'undefined' ? window.location.href : id;
 
+  // Load the photo through the same-origin proxy so the canvas isn't tainted
+  // when saving as an image; fall back to the direct Drive URL if that 404s.
+  const proxyPhoto = `${API_BASE_URL}/members/${encodeURIComponent(member.id)}/photo`;
+
   return (
     <div className="card-page">
-      <div className="id-card">
+      <div className="id-card" ref={cardRef}>
         <div className="id-card-banner">
           <img src="/pdp-logo.png" alt="PDP" className="id-card-logo" />
-          <span className="id-card-tag">OFFICIAL MEMBER</span>
+          <span className="id-card-tag">PDP-LABAN MEMBER</span>
         </div>
 
         <div className="id-card-body">
-          {member.photoUrl ? (
-            <img src={member.photoUrl} alt={name} className="id-card-photo" referrerPolicy="no-referrer" />
+          {member.photoUrl || member.photoFileId ? (
+            <img
+              src={proxyPhoto}
+              alt={name}
+              className="id-card-photo"
+              crossOrigin="anonymous"
+              onError={(e) => {
+                if (member.photoUrl && e.currentTarget.src !== member.photoUrl) {
+                  e.currentTarget.src = member.photoUrl;
+                }
+              }}
+            />
           ) : (
             <div className="id-card-photo id-card-photo--empty">No photo</div>
           )}
@@ -89,8 +123,8 @@ export function CardPage() {
       </div>
 
       <div className="card-print-actions">
-        <button type="button" className="btn-primary" onClick={() => window.print()}>
-          🖨 Print ID
+        <button type="button" className="btn-primary" onClick={saveAsImage} disabled={saving}>
+          {saving ? 'Saving…' : '⬇ Save as image'}
         </button>
       </div>
     </div>

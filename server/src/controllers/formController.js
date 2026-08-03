@@ -115,9 +115,8 @@ export async function submitForm(req, res) {
       ? `https://drive.google.com/thumbnail?id=${photoFileId}&sz=w600`
       : '';
 
-    const fullName = [data.firstName, data.middleName, data.surname]
-      .filter(Boolean)
-      .join(' ');
+    // ID card shows First + Surname only (middle name still lands in the Sheet).
+    const fullName = [data.firstName, data.surname].filter(Boolean).join(' ');
     const location = [data.municipality, data.province].filter(Boolean).join(', ');
 
     // Assign the membership ID and store the verify/print record in KV.
@@ -125,6 +124,7 @@ export async function submitForm(req, res) {
       fullName,
       location,
       photoUrl,
+      photoFileId,
       createdAt: new Date().toISOString()
     });
 
@@ -194,6 +194,34 @@ export async function getMemberCard(req, res) {
     photoUrl: member.photoUrl || '',
     createdAt: member.createdAt || ''
   });
+}
+
+/**
+ * Same-origin proxy for a member's photo. The card page loads the image through
+ * here so it can be captured as an image without cross-origin canvas tainting
+ * (a direct Google Drive URL would taint it). Streams the Drive thumbnail bytes.
+ */
+export async function getMemberPhoto(req, res) {
+  const id = String(req.params.id || '').trim();
+  if (!isKvConfigured()) return res.status(404).end();
+
+  const member = await getMember(id);
+  if (!member?.photoFileId) return res.status(404).end();
+
+  try {
+    const url = `https://drive.google.com/thumbnail?id=${member.photoFileId}&sz=w600`;
+    const upstream = await fetch(url);
+    if (!upstream.ok) return res.status(404).end();
+
+    const buffer = Buffer.from(await upstream.arrayBuffer());
+    res.setHeader('Content-Type', upstream.headers.get('content-type') || 'image/jpeg');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(buffer);
+  } catch (error) {
+    console.error('Photo proxy failed:', error.message);
+    res.status(404).end();
+  }
 }
 
 export async function getFormHeaders(req, res) {

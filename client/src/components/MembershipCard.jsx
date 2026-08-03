@@ -41,7 +41,7 @@ export function MembershipCard({ result, onReset }) {
   } = result || {};
 
   const name = (fullName ||
-    [details.firstName, details.middleName, details.surname].filter(Boolean).join(' ') ||
+    [details.firstName, details.surname].filter(Boolean).join(' ') ||
     'Member').toUpperCase();
 
   const place = (location ||
@@ -56,7 +56,7 @@ export function MembershipCard({ result, onReset }) {
       <div className="id-card">
         <div className="id-card-banner">
           <img src="/pdp-logo.png" alt="PDP" className="id-card-logo" />
-          <span className="id-card-tag">OFFICIAL MEMBER</span>
+          <span className="id-card-tag">PDP-LABAN MEMBER</span>
         </div>
 
         <div className="id-card-body">
