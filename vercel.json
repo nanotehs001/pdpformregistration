@@ -11,5 +11,5 @@
       "runtime": "nodejs18.x",
       "maxDuration": 30
     }
-  },
+  }
 }
