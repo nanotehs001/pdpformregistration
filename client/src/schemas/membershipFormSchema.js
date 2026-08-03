@@ -91,17 +91,4 @@ export const membershipFormSchema = z.object({
     name: z.string().optional(),
     topic: z.string().optional()
   })).length(3).optional()
-}).refine(
-  (data) => {
-    const hasEmployment =
-      (data.electedOfficial?.checked && data.electedOfficial?.position) ||
-      (data.governmentEmployee?.checked && data.governmentEmployee?.position) ||
-      (data.privateEmployee?.checked && data.privateEmployee?.position) ||
-      (data.affiliatedOrganization?.checked && data.affiliatedOrganization?.organization);
-    return hasEmployment;
-  },
-  {
-    message: 'At least one employment/affiliation section must be filled',
-    path: ['employment']
-  }
-);
+});
