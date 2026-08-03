@@ -4,6 +4,7 @@
   "buildCommand": "cd client && npm run build",
   "outputDirectory": "client/dist",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/pdpadmin(.*)", "destination": "/index.html" },
+    { "source": "/form(.*)", "destination": "/index.html" }
   ]
 }
