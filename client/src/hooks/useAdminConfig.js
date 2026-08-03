@@ -55,5 +55,19 @@ export function useAdminConfig() {
     }
   };
 
-  return { config, problems, loading, error, connectGoogle, refetch: fetchConfig };
+  // Saves the Sheet URL / Drive folder. Locally this persists to .env; on Vercel
+  // the response carries needsManualEnv + the values to paste into the dashboard.
+  const updateDestination = async ({ sheetUrl, folderUrl }) => {
+    const { data } = await axios.post(
+      `${API_BASE_URL}/admin/destination`,
+      { sheetUrl, folderUrl },
+      { headers: authHeader() }
+    );
+    if (data.saved) {
+      await fetchConfig();
+    }
+    return data;
+  };
+
+  return { config, problems, loading, error, connectGoogle, updateDestination, refetch: fetchConfig };
 }

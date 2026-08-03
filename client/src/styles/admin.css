@@ -449,6 +449,16 @@
   margin-bottom: 20px;
 }
 
+.alert-warn {
+  background: #fdf7ec;
+  border-color: #ecd9ad;
+  color: #8a5a12;
+}
+
+.alert-warn code {
+  word-break: break-all;
+}
+
 /* How it works */
 .how-grid {
   display: grid;

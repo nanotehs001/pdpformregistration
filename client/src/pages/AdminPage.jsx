@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAdminConfig } from '../hooks/useAdminConfig';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import '../styles/admin.css';
@@ -55,17 +55,99 @@ function StatusPill({ ok, children }) {
   );
 }
 
-function ReadOnlyValue({ label, value, envVar, empty }) {
+function DestinationCard({ config, updateDestination }) {
+  const [sheetUrl, setSheetUrl] = useState('');
+  const [folderUrl, setFolderUrl] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [saved, setSaved] = useState(false);
+  const [manualEnv, setManualEnv] = useState(null);
+
+  // Prefill with the current ids so the fields aren't blank on load.
+  useEffect(() => {
+    setSheetUrl(config?.sheetId || '');
+    setFolderUrl(config?.folderId || '');
+  }, [config?.sheetId, config?.folderId]);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    setError('');
+    setSaved(false);
+    setManualEnv(null);
+    try {
+      const result = await updateDestination({ sheetUrl, folderUrl });
+      if (result.saved) {
+        setSaved(true);
+      } else if (result.needsManualEnv) {
+        setManualEnv(result.values || []);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not save the destination.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
-    <div className="field">
-      <label>{label}</label>
-      <div className={`readonly-value ${value ? '' : 'is-empty'}`}>
-        {value || empty}
+    <section className="card">
+      <div className="card-head">
+        <h2>Destination</h2>
+        <span className="card-badge badge-muted">Editable</span>
       </div>
-      <p className="hint">
-        Set by <code>{envVar}</code>
-      </p>
-    </div>
+
+      <form onSubmit={submit}>
+        <div className="field">
+          <label htmlFor="sheetUrl">Google Sheet URL or ID</label>
+          <input
+            id="sheetUrl"
+            className="input"
+            value={sheetUrl}
+            onChange={(e) => setSheetUrl(e.target.value)}
+            placeholder="https://docs.google.com/spreadsheets/d/…/edit"
+          />
+          <p className="hint">Stored as <code>GOOGLE_SHEET_URL</code></p>
+        </div>
+
+        <div className="field">
+          <label htmlFor="folderUrl">Drive Folder URL or ID (optional)</label>
+          <input
+            id="folderUrl"
+            className="input"
+            value={folderUrl}
+            onChange={(e) => setFolderUrl(e.target.value)}
+            placeholder="https://drive.google.com/drive/folders/… (blank = Drive root)"
+          />
+          <p className="hint">Stored as <code>GOOGLE_DRIVE_FOLDER_URL</code></p>
+        </div>
+
+        <button type="submit" className="btn btn-primary" disabled={busy}>
+          {busy ? 'Saving…' : 'Save destination'}
+        </button>
+      </form>
+
+      {error && <div className="alert alert-error">{error}</div>}
+
+      {saved && (
+        <div className="alert alert-success">Saved. New submissions will use these.</div>
+      )}
+
+      {manualEnv && (
+        <div className="alert alert-warn">
+          <strong>Add these in Vercel → Settings → Environment Variables, then redeploy:</strong>
+          <ul className="problem-list">
+            {manualEnv.map((v) => (
+              <li key={v.key}>
+                <code>{v.key}</code> = <code>{v.value}</code>
+              </li>
+            ))}
+          </ul>
+          <p className="card-note">
+            The server here can’t write files (read-only on Vercel), so these must be set in the dashboard.
+          </p>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -90,7 +172,7 @@ export function AdminPage() {
 }
 
 function AdminDashboard({ onSignOut, showSignOut }) {
-  const { config, problems, loading, error, connectGoogle } = useAdminConfig();
+  const { config, problems, loading, error, connectGoogle, updateDestination } = useAdminConfig();
 
   if (loading) {
     return (
@@ -173,49 +255,32 @@ function AdminDashboard({ onSignOut, showSignOut }) {
             </p>
           </section>
 
-          <section className="card">
-            <div className="card-head">
-              <h2>Destination</h2>
-              <span className="card-badge badge-muted">Read-only</span>
-            </div>
-
-            <ReadOnlyValue
-              label="Google Sheet ID"
-              value={config?.sheetId}
-              envVar="GOOGLE_SHEET_URL"
-              empty="Not set"
-            />
-
-            <ReadOnlyValue
-              label="Drive Folder ID"
-              value={config?.folderId}
-              envVar="GOOGLE_DRIVE_FOLDER_URL"
-              empty="Not set — files go to your Drive root"
-            />
-          </section>
+          <DestinationCard config={config} updateDestination={updateDestination} />
         </div>
 
         <section className="card card-wide">
           <div className="card-head">
-            <h2>Changing these settings</h2>
+            <h2>How saving works</h2>
           </div>
           <div className="how-grid">
             <div className="how-item">
               <h3>Locally</h3>
               <p>
-                Edit <code>server/.env</code> and restart the server.
+                Saving writes to <code>server/.env</code> and takes effect right away.
               </p>
             </div>
             <div className="how-item">
               <h3>On Vercel</h3>
               <p>
-                Update Environment Variables in the project settings, then redeploy.
+                The filesystem is read-only, so saving shows the exact values to paste
+                into Environment Variables — then redeploy.
               </p>
             </div>
             <div className="how-item">
-              <h3>Why read-only</h3>
+              <h3>No database</h3>
               <p>
-                There is no database, so nothing saved here could survive a restart.
+                Everything lives in environment variables, which is why Vercel changes
+                need a redeploy to stick.
               </p>
             </div>
           </div>

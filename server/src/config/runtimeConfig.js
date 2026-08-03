@@ -10,13 +10,13 @@
 
 // Accepts a full Google URL or a bare ID so a pasted URL and a raw ID behave
 // identically.
-function idFromSheetUrl(value) {
+export function idFromSheetUrl(value) {
   if (!value) return null;
   const match = /\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/.exec(value);
   return (match ? match[1] : value).trim() || null;
 }
 
-function idFromFolderUrl(value) {
+export function idFromFolderUrl(value) {
   if (!value) return null;
   const match = /\/folders\/([a-zA-Z0-9-_]+)/.exec(value);
   const id = match ? match[1] : value;
