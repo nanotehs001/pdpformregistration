@@ -211,6 +211,9 @@ function AdminDashboard({ onSignOut, showSignOut }) {
             <StatusPill ok={ready}>
               {ready ? 'Accepting submissions' : 'Needs attention'}
             </StatusPill>
+            <StatusPill ok={Boolean(config?.kvConnected)}>
+              {config?.kvConnected ? 'KV: live saves' : 'KV: not connected'}
+            </StatusPill>
             {showSignOut && (
               <button type="button" onClick={onSignOut} className="btn btn-ghost btn-small">
                 Sign out

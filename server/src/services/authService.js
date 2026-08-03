@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { getRuntimeConfig } from '../config/runtimeConfig.js';
+import { isKvConfigured } from './configStore.js';
 
 /**
  * Google access using a long-lived refresh token held in the environment.
@@ -63,12 +64,15 @@ export async function getValidAccessToken() {
 export function getAdminConfig() {
   const { sheetId, folderId, refreshToken } = getRuntimeConfig();
 
+  const kvConnected = isKvConfigured();
+
   return {
     sheetId,
     folderId,
     isConnected: Boolean(refreshToken),
-    readOnly: true,
-    source: 'env'
+    // When KV is connected, saves persist live; otherwise it's paste-and-redeploy.
+    kvConnected,
+    source: kvConnected ? 'kv' : 'env'
   };
 }
 

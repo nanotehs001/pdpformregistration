@@ -33,17 +33,25 @@ let overrides = {}; // key -> value pulled from KV
 let loadedAt = 0;
 let client = null;
 
+// The classic Vercel KV integration injects KV_REST_API_*; the newer Upstash
+// marketplace integration (what "Vercel KV" now points to) may instead inject
+// UPSTASH_REDIS_REST_*. Accept either so it works however the store was added.
+function kvCreds() {
+  return {
+    url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
+  };
+}
+
 export function isKvConfigured() {
-  return Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+  const { url, token } = kvCreds();
+  return Boolean(url && token);
 }
 
 function kvClient() {
   if (!isKvConfigured()) return null;
   if (!client) {
-    client = createClient({
-      url: process.env.KV_REST_API_URL,
-      token: process.env.KV_REST_API_TOKEN
-    });
+    client = createClient(kvCreds());
   }
   return client;
 }
