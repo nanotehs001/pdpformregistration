@@ -87,6 +87,12 @@ export function CardPage() {
           <div className="id-card-id">{member.id}</div>
         </div>
       </div>
+
+      <div className="card-print-actions">
+        <button type="button" className="btn-primary" onClick={() => window.print()}>
+          🖨 Print ID
+        </button>
+      </div>
     </div>
   );
 }
