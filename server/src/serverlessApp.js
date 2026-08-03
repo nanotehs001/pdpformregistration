@@ -27,7 +27,11 @@ app.use(cors({
 app.use(express.json({ limit: '4mb' }));
 app.use(express.urlencoded({ extended: true, limit: '4mb' }));
 
-// Mount routes without /api prefix (Vercel serverless handles /api routing)
+// Mount routes at BOTH prefixes so this works whether or not Vercel strips the
+// leading /api before invoking the function. Express matches the first that fits.
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api', formRoutes);
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/', formRoutes);
@@ -36,11 +40,12 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Temporarily expose the real error message so production 500s are debuggable.
 app.use((err, req, res, next) => {
-  console.error(err);
+  console.error('[serverless error]', err);
   res.status(500).json({
     error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+    message: err?.message || String(err)
   });
 });
 
