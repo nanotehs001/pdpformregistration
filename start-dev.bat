@@ -1,11 +1,11 @@
 @echo off
-REM Windows startup script for PDP Membership Form App
+REM Windows startup script for PDP LABAN Membership Form App
 
 setlocal enabledelayedexpansion
 
 echo.
 echo ==========================================
-echo Starting PDP Membership Form App...
+echo Starting PDP LABAN Membership Form App...
 echo ==========================================
 echo.
 

@@ -10,7 +10,7 @@ function App() {
       <div className="app-wrapper">
         <nav className="app-nav">
           <div className="nav-container">
-            <h1 className="nav-logo">PDP Membership</h1>
+            <h1 className="nav-logo">PDP LABAN Membership</h1>
             <ul className="nav-links">
               <li><Link to="/">Member Form</Link></li>
             </ul>

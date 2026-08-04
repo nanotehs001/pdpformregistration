@@ -6,7 +6,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${YELLOW}Starting PDP Membership Form App...${NC}"
+echo -e "${YELLOW}Starting PDP LABAN Membership Form App...${NC}"
 echo ""
 
 # Check if .env file exists in server

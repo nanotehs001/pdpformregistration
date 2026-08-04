@@ -1,13 +1,13 @@
 # Google Cloud Setup Guide
 
-This guide walks you through setting up Google Cloud and Google Sheets for the PDP Membership Form application.
+This guide walks you through setting up Google Cloud and Google Sheets for the PDP LABAN Membership Form application.
 
 ## 1. Create a Google Cloud Project
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com)
 2. Click on the project dropdown at the top
 3. Click "NEW PROJECT"
-4. Name it "PDP Membership Form" (or any name you prefer)
+4. Name it "PDP LABAN Membership Form" (or any name you prefer)
 5. Click "CREATE"
 6. Wait for the project to be created and select it
 
@@ -69,7 +69,7 @@ Copy these values (you'll need them for `.env`):
 
 1. Go to [Google Sheets](https://sheets.google.com)
 2. Click "Create" → "Blank spreadsheet"
-3. Name it "PDP Membership Applications"
+3. Name it "PDP LABAN Membership Applications"
 4. In the first row, add column headers for form fields:
    ```
    First Name | Middle Name | Surname | Birthdate | Birthplace | Age | Gender | Civil Status | Religion | Address | Province | Barangay | Municipality | District | Mobile | Email | Education | School | Year Graduated | Profession | [other fields...]

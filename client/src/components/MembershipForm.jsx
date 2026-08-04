@@ -130,8 +130,7 @@ export function MembershipForm({ onSuccess }) {
   return (
     <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="membership-form">
       <div className="form-header">
-        <h1>PDP Membership Application Form</h1>
-        <p className="form-subtitle">Philippine Democratic Party</p>
+        <h1>PDP LABAN Membership Application Form</h1>
       </div>
 
       {/* Progress Indicator */}

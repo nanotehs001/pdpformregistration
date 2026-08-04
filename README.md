@@ -1,6 +1,6 @@
-# PDP Membership Application Form
+# PDP LABAN Membership Application Form
 
-A modern web application for collecting PDP (Philippine Democratic Party) membership applications. Features complex form handling with conditional employment sections, built with React frontend and Node.js/Express backend that writes directly to Google Sheets.
+A modern web application for collecting PDP LABAN membership applications. Features complex form handling with conditional employment sections, built with React frontend and Node.js/Express backend that writes directly to Google Sheets.
 
 ## Quick Start
 
