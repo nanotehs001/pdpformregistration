@@ -76,14 +76,14 @@ body {
 }
 
 .progress-step.active .step-number {
-  background-color: #1a472a;
+  background-color: #0038A8;
   color: white;
 }
 
 .progress-step.current .step-number {
-  background-color: #1a472a;
+  background-color: #0038A8;
   color: white;
-  box-shadow: 0 0 0 3px rgba(26, 71, 42, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 56, 168, 0.2);
 }
 
 .step-info {
@@ -118,7 +118,7 @@ body {
 
 .progress-fill {
   height: 100%;
-  background-color: #1a472a;
+  background-color: #0038A8;
   transition: width 0.3s ease;
 }
 
@@ -216,7 +216,7 @@ body {
 
 .form-header h1 {
   font-size: 32px;
-  color: #1a472a;
+  color: #0038A8;
   margin-bottom: 8px;
 }
 
@@ -249,7 +249,7 @@ body {
 
 .form-section h2 {
   font-size: 20px;
-  color: #1a472a;
+  color: #0038A8;
   margin-bottom: 20px;
   font-weight: 600;
 }
@@ -353,8 +353,8 @@ body {
 
 .form-input:focus {
   outline: none;
-  border-color: #1a472a;
-  box-shadow: 0 0 0 3px rgba(26, 71, 42, 0.1);
+  border-color: #0038A8;
+  box-shadow: 0 0 0 3px rgba(0, 56, 168, 0.1);
 }
 
 .form-input.input-error {
@@ -404,7 +404,7 @@ body {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #1a472a;
+  accent-color: #0038A8;
 }
 
 /* Conditional Fields */
@@ -412,7 +412,7 @@ body {
   margin-left: 30px;
   padding: 15px;
   background-color: #f9f9f9;
-  border-left: 3px solid #1a472a;
+  border-left: 3px solid #0038A8;
   border-radius: 4px;
   margin-top: 10px;
 }
@@ -432,7 +432,7 @@ body {
 .attestation-box {
   background-color: #f5f5f5;
   padding: 20px;
-  border-left: 4px solid #1a472a;
+  border-left: 4px solid #0038A8;
   border-radius: 4px;
   margin-bottom: 20px;
   line-height: 1.6;
@@ -449,7 +449,7 @@ body {
 }
 
 .btn-primary {
-  background-color: #1a472a;
+  background-color: #0038A8;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -461,7 +461,7 @@ body {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #0d2a1a;
+  background-color: #002a7f;
 }
 
 .btn-primary:disabled {
@@ -501,7 +501,7 @@ body {
 
 .success-message h2 {
   font-size: 28px;
-  color: #1a472a;
+  color: #0038A8;
   margin-bottom: 15px;
 }
 
@@ -548,7 +548,7 @@ body {
 .file-input-label {
   display: inline-block;
   padding: 14px 20px;
-  background-color: #1a472a;
+  background-color: #0038A8;
   color: white;
   border-radius: 4px;
   cursor: pointer;
@@ -558,7 +558,7 @@ body {
 }
 
 .file-input-label:hover {
-  background-color: #0d2a1a;
+  background-color: #002a7f;
 }
 
 .file-input-hint {
@@ -576,7 +576,7 @@ body {
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 6px;
-  border: 2px dashed #1a472a;
+  border: 2px dashed #0038A8;
 }
 
 .photo-preview-container h3 {
@@ -704,7 +704,7 @@ body {
 .btn-link {
   background: none;
   border: none;
-  color: #1b4332;
+  color: #0038A8;
   font-size: 13px;
   text-decoration: underline;
   cursor: pointer;

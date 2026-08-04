@@ -1,8 +1,11 @@
 /* Admin Page Styles */
 
 :root {
-  --pdp-green: #1a472a;
-  --pdp-green-dark: #12331d;
+  /* PDP LABAN brand: Philippine-flag blue primary, red + gold accents. */
+  --pdp-primary: #0038A8;
+  --pdp-primary-dark: #002a7f;
+  --pdp-red: #CE1126;
+  --pdp-gold: #FCD116;
   --ink: #1c1f1d;
   --ink-soft: #5b6560;
   --line: #e3e7e4;
@@ -21,7 +24,7 @@
 }
 
 .app-nav {
-  background-color: var(--pdp-green);
+  background-color: var(--pdp-primary);
   color: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
@@ -190,7 +193,7 @@
 }
 
 .setup-track li.active .track-marker {
-  background: var(--pdp-green);
+  background: var(--pdp-primary);
   color: #fff;
 }
 
@@ -362,8 +365,8 @@
 
 .input:focus {
   outline: none;
-  border-color: var(--pdp-green);
-  box-shadow: 0 0 0 3px rgba(26, 71, 42, 0.1);
+  border-color: var(--pdp-primary);
+  box-shadow: 0 0 0 3px rgba(0, 56, 168, 0.1);
 }
 
 .hint {
@@ -390,12 +393,12 @@
 }
 
 .btn-primary {
-  background: var(--pdp-green);
+  background: var(--pdp-primary);
   color: #fff;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--pdp-green-dark);
+  background: var(--pdp-primary-dark);
 }
 
 .btn-primary:disabled {
