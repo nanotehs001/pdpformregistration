@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { FormPage } from './pages/FormPage';
 import { AdminPage } from './pages/AdminPage';
 import { CardPage } from './pages/CardPage';
@@ -8,15 +8,6 @@ function App() {
   return (
     <Router>
       <div className="app-wrapper">
-        <nav className="app-nav">
-          <div className="nav-container">
-            <h1 className="nav-logo">PDP LABAN Membership</h1>
-            <ul className="nav-links">
-              <li><Link to="/">Member Form</Link></li>
-            </ul>
-          </div>
-        </nav>
-
         <div className="app-container">
           <Routes>
             <Route path="/" element={<FormPage />} />

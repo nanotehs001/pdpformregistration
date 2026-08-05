@@ -130,6 +130,7 @@ export function MembershipForm({ onSuccess }) {
   return (
     <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="membership-form">
       <div className="form-header">
+        <img src="/pdp-logo.png" alt="PDP LABAN" className="form-logo" />
         <h1>PDP LABAN Membership Application Form</h1>
       </div>
 
