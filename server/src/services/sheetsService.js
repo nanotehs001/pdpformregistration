@@ -83,7 +83,12 @@ export async function ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetGi
   });
 
   const firstRow = existing.data.values?.[0] || [];
-  if (firstRow.some((cell) => String(cell).trim() !== '')) {
+  const hasContent = firstRow.some((cell) => String(cell).trim() !== '');
+
+  // Already fully headed — leave it alone. If it has an older, shorter header
+  // row (missing newly-added columns), fall through to rewrite it in full so
+  // the new columns get their labels too.
+  if (hasContent && firstRow.length >= SHEET_HEADERS.length) {
     return false;
   }
 
@@ -93,6 +98,11 @@ export async function ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetGi
     valueInputOption: 'RAW',
     requestBody: { values: [SHEET_HEADERS] }
   });
+
+  // A pre-existing tab is already formatted; only style brand-new tabs.
+  if (hasContent) {
+    return true;
+  }
 
   // Bold + freeze the header so it stays visible while scrolling.
   try {
