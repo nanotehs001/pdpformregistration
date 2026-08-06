@@ -8,9 +8,18 @@ function a1(title, ref) {
   return `'${String(title).replace(/'/g, "''")}'!${ref}`;
 }
 
+// Google Sheets tab titles: max 100 chars and may not contain : \ / ? * [ ].
+function sanitizeTabName(name) {
+  const cleaned = String(name || '')
+    .replace(/[:\\/?*[\]]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 100);
+  return cleaned || 'Unspecified';
+}
+
 // The sheet is chosen by the admin at runtime (env/KV), not at boot, so resolve
-// credentials and the target sheet — including its actual first-tab name — on
-// every call. Hardcoding "Sheet1" breaks whenever the tab is named anything else.
+// credentials on every call.
 async function getSheetsContext() {
   const config = getAdminConfig();
 
@@ -27,25 +36,45 @@ async function getSheetsContext() {
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
 
-  const sheets = google.sheets({ version: 'v4', auth });
-  const spreadsheetId = config.sheetId;
+  return {
+    sheets: google.sheets({ version: 'v4', auth }),
+    spreadsheetId: config.sheetId
+  };
+}
 
-  // Discover the first tab's real title + numeric id.
+async function listTabs(sheets, spreadsheetId) {
   const meta = await sheets.spreadsheets.get({
     spreadsheetId,
     fields: 'sheets.properties(sheetId,title,index)'
   });
-  const firstTab = meta.data.sheets?.[0]?.properties;
-  const sheetTitle = firstTab?.title || 'Sheet1';
-  const sheetGid = firstTab?.sheetId ?? 0;
-
-  return { sheets, spreadsheetId, sheetTitle, sheetGid };
+  return (meta.data.sheets || []).map((s) => s.properties);
 }
 
 /**
- * Writes the header row when the sheet has none, so an admin opening the sheet
- * can tell what each column means. Existing content is never overwritten: if
- * row 1 already holds something, it is left exactly as-is.
+ * Finds the tab for a province, creating it if absent. Submissions are filed by
+ * province so each area lives on its own tab; a new province spins up a new tab
+ * automatically. Returns the tab's real title and numeric id.
+ */
+async function ensureProvinceTab(sheets, spreadsheetId, provinceRaw) {
+  const wanted = sanitizeTabName(provinceRaw);
+  const tabs = await listTabs(sheets, spreadsheetId);
+
+  const existing = tabs.find(
+    (t) => t.title.trim().toLowerCase() === wanted.toLowerCase()
+  );
+  if (existing) return { title: existing.title, gid: existing.sheetId };
+
+  const res = await sheets.spreadsheets.batchUpdate({
+    spreadsheetId,
+    requestBody: { requests: [{ addSheet: { properties: { title: wanted } } }] }
+  });
+  const created = res.data.replies?.[0]?.addSheet?.properties;
+  return { title: created.title, gid: created.sheetId };
+}
+
+/**
+ * Writes the header row when the tab has none, so an admin opening it can tell
+ * what each column means. Existing content is never overwritten.
  */
 export async function ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetGid) {
   const existing = await sheets.spreadsheets.values.get({
@@ -100,15 +129,20 @@ export async function ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetGi
   return true;
 }
 
-export async function appendRowToSheet(values) {
+/**
+ * Appends one submission, filed onto the tab for `province` (created on demand).
+ * Falls back to an "Unspecified" tab when no province is given (e.g. NCR).
+ */
+export async function appendRowToSheet(values, province) {
   try {
-    const { sheets, spreadsheetId, sheetTitle, sheetGid } = await getSheetsContext();
+    const { sheets, spreadsheetId } = await getSheetsContext();
 
-    await ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetGid);
+    const { title, gid } = await ensureProvinceTab(sheets, spreadsheetId, province);
+    await ensureHeaderRow(sheets, spreadsheetId, title, gid);
 
     const result = await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: a1(sheetTitle, 'A1'),
+      range: a1(title, 'A1'),
       // RAW, not USER_ENTERED: Sheets parses a leading "+" as a formula and
       // would mangle mobile numbers like +639123456789 into a plain integer.
       valueInputOption: 'RAW',
@@ -120,6 +154,7 @@ export async function appendRowToSheet(values) {
 
     return {
       success: true,
+      tab: title,
       updatedRange: result.data.updates.updatedRange,
       updatedRows: result.data.updates.updatedRows
     };
@@ -131,11 +166,14 @@ export async function appendRowToSheet(values) {
 
 export async function getSheetHeaders() {
   try {
-    const { sheets, spreadsheetId, sheetTitle } = await getSheetsContext();
+    const { sheets, spreadsheetId } = await getSheetsContext();
+    const tabs = await listTabs(sheets, spreadsheetId);
+    const first = tabs[0];
+    if (!first) return [];
 
     const result = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: a1(sheetTitle, '1:1')
+      range: a1(first.title, '1:1')
     });
 
     return result.data.values?.[0] || [];

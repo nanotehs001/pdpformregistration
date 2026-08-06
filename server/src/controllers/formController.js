@@ -142,7 +142,10 @@ export async function submitForm(req, res) {
       cardUrl
     });
 
-    const result = await appendRowToSheet(row);
+    // File the row onto a tab named after the province (region for NCR, which
+    // has no province; "Unspecified" as a last resort). New provinces auto-create.
+    const provinceTab = data.province || data.region || 'Unspecified';
+    const result = await appendRowToSheet(row, provinceTab);
 
     res.status(201).json({
       success: true,
