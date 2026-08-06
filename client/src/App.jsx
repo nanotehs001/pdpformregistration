@@ -22,6 +22,10 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
+
+        <footer className="app-footer">
+          © {new Date().getFullYear()} PDP LABAN Membership — Exclusively made by Region 10. All rights reserved.
+        </footer>
       </div>
     </Router>
   );
