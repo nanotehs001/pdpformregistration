@@ -40,16 +40,35 @@ export function AdminSection({ register, formState }) {
       />
 
       <div className="form-row">
-        <p className="subsection-title">Trainers</p>
+        <div className="form-col">
+          <TextInput
+            label="BMS Held at"
+            register={register}
+            name="bmsHeldAt"
+            error={errors.bmsHeldAt}
+          />
+        </div>
+        <div className="form-col">
+          <TextInput
+            label="Time"
+            register={register}
+            name="bmsTime"
+            error={errors.bmsTime}
+          />
+        </div>
+      </div>
+
+      <div className="form-row">
+        <p className="subsection-title">Trainors</p>
       </div>
 
       {[0, 1, 2].map((index) => (
         <div key={index} className="trainer-block">
-          <h4>Trainer {index + 1}</h4>
+          <h4>Trainor {index + 1}</h4>
           <div className="form-row">
             <div className="form-col">
               <TextInput
-                label="Trainer Name"
+                label="Trainor Name"
                 register={register}
                 name={`trainers.${index}.name`}
                 error={errors.trainers?.[index]?.name}

@@ -2,12 +2,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { FormPage } from './pages/FormPage';
 import { AdminPage } from './pages/AdminPage';
 import { CardPage } from './pages/CardPage';
+import { InstallPrompt } from './components/InstallPrompt';
 import './styles/app.css';
 
 function App() {
   return (
     <Router>
       <div className="app-wrapper">
+        <InstallPrompt />
         <div className="app-container">
           <Routes>
             <Route path="/" element={<FormPage />} />

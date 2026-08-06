@@ -87,6 +87,8 @@ export const membershipFormSchema = z.object({
   regionalCouncil: z.string().optional(),
   approvedForBMS: z.boolean().optional(),
   bmsConductedBy: z.string().optional(),
+  bmsHeldAt: z.string().optional(),
+  bmsTime: z.string().optional(),
   trainers: z.array(z.object({
     name: z.string().optional(),
     topic: z.string().optional()

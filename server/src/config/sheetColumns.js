@@ -39,7 +39,14 @@ export const SHEET_COLUMNS = [
   { key: 'recruitedBy', label: 'Recruited By' },
   { key: 'recommendedBy', label: 'Recommended By' },
   { key: 'membershipId', label: 'Membership ID' },
-  { key: 'cardUrl', label: 'Card URL (print)' }
+  { key: 'cardUrl', label: 'Card URL (print)' },
+  { key: 'bmsHeldAt', label: 'BMS Held at' },
+  { key: 'bmsTime', label: 'Time' },
+  // Blank columns for staff to fill in on the sheet after issuance.
+  { key: 'amountPaid', label: 'Amount Paid' },
+  { key: 'dateIssued', label: 'Date Issued' },
+  { key: 'acknowledgementReceiptNo', label: 'Acknowledgement Receipt #' },
+  { key: 'receivedBy', label: 'Received by' }
 ];
 
 export const SHEET_HEADERS = SHEET_COLUMNS.map((column) => column.label);

@@ -222,6 +222,103 @@ body {
   margin: 0 auto 14px;
 }
 
+/* Install (PWA) top bar */
+.install-bar {
+  background: #0038A8;
+  color: #fff;
+}
+
+.install-bar-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.install-bar-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.install-bar-text {
+  font-size: 14px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.install-bar-btn {
+  background: #FCD116;
+  color: #1c1f1d;
+  border: none;
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.install-bar-btn:hover {
+  background: #eac310;
+}
+
+/* First-visit install popup */
+.install-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.install-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 24px;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.install-modal-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  margin-bottom: 14px;
+}
+
+.install-modal h3 {
+  margin: 0 0 8px;
+  font-size: 19px;
+  color: #0038A8;
+}
+
+.install-modal p {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.install-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.install-modal-actions .btn-primary,
+.install-modal-actions .btn-secondary {
+  flex: 1;
+}
+
 .form-header h1 {
   font-size: 32px;
   color: #0038A8;
