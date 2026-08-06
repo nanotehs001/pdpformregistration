@@ -62,7 +62,7 @@ export function MembershipForm({ onSuccess }) {
   // Define fields for each step
   const stepFields = {
     1: ['firstName', 'middleName', 'surname', 'birthdate', 'birthplace', 'age', 'gender', 'civilStatus', 'religion'],
-    2: ['permanentAddress', 'region', 'barangay', 'municipality', 'district', 'profilePhoto'],
+    2: ['permanentAddress', 'region', 'barangay', 'municipality', 'profilePhoto'],
     3: ['mobileNumber', 'email', 'educationalAttainment', 'nameOfSchool', 'yearGraduated', 'currentProfession'],
     4: ['electedOfficial', 'governmentEmployee', 'privateEmployee', 'affiliatedOrganization'],
     5: ['attestationChecked', 'signature', 'signatureImage', 'recruitedBy', 'recommendedBy']

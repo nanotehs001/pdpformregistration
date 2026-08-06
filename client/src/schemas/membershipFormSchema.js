@@ -21,7 +21,7 @@ export const membershipFormSchema = z.object({
   province: z.string().optional(),
   barangay: z.string().min(1, 'Barangay is required'),
   municipality: z.string().min(1, 'Municipality/City is required'),
-  district: z.string().min(1, 'District is required'),
+  district: z.string().optional(),
 
   // Uploaded File object. Must be declared or Zod strips it from the parsed
   // output and the photo never reaches the submit handler.

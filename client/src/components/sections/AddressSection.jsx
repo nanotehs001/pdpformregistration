@@ -285,7 +285,6 @@ export function AddressSection({ register, formState, setValue, watch }) {
             register={register}
             name="district"
             error={errors.district}
-            required
           />
         </div>
       </div>
